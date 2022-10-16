@@ -1,0 +1,10 @@
+version: "2.7"
+
+services:
+  volcan:
+    build: .
+    env_file: .env
+    volumes:
+      - ./.env:/config/.env:ro
+      - ./config.yml:/config/config.yml:ro
+    restart: unless-stopped
