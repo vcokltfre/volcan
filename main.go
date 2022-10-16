@@ -1,8 +1,11 @@
 package main
 
 import (
+	"os"
+
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
+	"github.com/vcokltfre/volcan/src/api"
 )
 
 func init() {
@@ -15,4 +18,6 @@ func init() {
 
 func main() {
 	logrus.Info("Starting Volcan...")
+
+	api.Start(os.Getenv("API_BIND"))
 }
