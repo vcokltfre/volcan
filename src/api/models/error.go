@@ -1,7 +1,14 @@
 package models
 
+/*
+Error categories:
+- 1000: Generic errors
+- 11xx: Authentication errors
+*/
+
 const (
-	ErrorInvalidToken ErrorCode = 1000
+	ErrorGeneric      ErrorCode = 1000
+	ErrorInvalidToken ErrorCode = 1100
 )
 
 type ErrorCode int
