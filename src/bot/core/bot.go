@@ -108,20 +108,22 @@ func (b *Bot) handleMessage(msg *events.MessageCreate) {
 		return
 	}
 
-	args, err := glex.SplitCommand(commandString)
-	if err != nil {
-		return // TODO: handle error and display to user
-	}
-
 	ctx := &Context{
 		Bot:     b,
 		Message: &msg.Message,
 		Event:   msg,
 	}
 
+	args, err := glex.SplitCommand(msg.Message.Content)
+	if err != nil {
+		ctx.Error(fmt.Errorf("parsing failed: %v", err))
+		return
+	}
+
 	err = command.Run(ctx, args[num:])
 	if err != nil {
-		return // TODO: handle error and display to user
+		ctx.Error(err)
+		return
 	}
 }
 

@@ -43,3 +43,12 @@ func (c *Context) GetLevel() int {
 
 	return topLevel
 }
+
+func (c *Context) Error(err error) {
+	c.Bot.Client.Rest().CreateMessage(
+		c.Event.ChannelID,
+		discord.NewMessageCreateBuilder().SetContent("An error occurred: "+err.Error()).SetAllowedMentions(&discord.AllowedMentions{
+			Parse: []discord.AllowedMentionType{},
+		}).Build(),
+	)
+}
