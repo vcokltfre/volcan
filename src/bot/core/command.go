@@ -206,7 +206,7 @@ func (c *Command) match(ctx *Context, args []string) error {
 		}
 	}
 
-	if c.VarArg != nil && len(cleanArgs) > len(c.Args) {
+	if c.VarArg == nil && len(cleanArgs) > len(c.Args) {
 		return fmt.Errorf("too many arguments, max %d given %d", len(c.Args), len(cleanArgs))
 	}
 
