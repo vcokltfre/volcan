@@ -10,6 +10,11 @@ type Context struct {
 	Bot     *Bot
 	Event   *events.MessageCreate
 	Message *discord.Message
+
+	args    map[string]string
+	flags   map[string]string
+	bools   map[string]bool
+	varArgs []string
 }
 
 func (c *Context) GetLevel() int {
@@ -51,4 +56,16 @@ func (c *Context) Error(err error) {
 			Parse: []discord.AllowedMentionType{},
 		}).Build(),
 	)
+}
+
+func (c *Context) Arg(name string) string {
+	return c.args[name]
+}
+
+func (c *Context) Flag(name string) string {
+	return c.flags[name]
+}
+
+func (c *Context) Bool(name string) bool {
+	return c.bools[name]
 }

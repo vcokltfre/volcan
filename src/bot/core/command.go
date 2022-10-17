@@ -2,6 +2,7 @@ package core
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/vcokltfre/volcan/src/utils"
 )
@@ -46,8 +47,9 @@ type Command struct {
 	Flags       []*Flag
 	VarArg      *VarArg
 
-	module *Module
-	parent *Command
+	module   *Module
+	parent   *Command
+	required int
 }
 
 func (c *Command) Build(module *Module, parent *Command) error {
@@ -57,6 +59,12 @@ func (c *Command) Build(module *Module, parent *Command) error {
 	for _, command := range c.Commands {
 		if err := command.Build(module, c); err != nil {
 			return err
+		}
+	}
+
+	for _, arg := range c.Args {
+		if arg.Required {
+			c.required++
 		}
 	}
 
@@ -104,7 +112,142 @@ func (c *Command) Run(ctx *Context, args []string) error {
 		parent = parent.parent
 	}
 
+	if err := c.match(ctx, args); err != nil {
+		return err
+	}
+
 	return c.Handler(ctx)
+}
+
+func (c *Command) match(ctx *Context, args []string) error {
+	cleanArgs := []string{}
+	index := 0
+
+	flagsDone := []string{}
+
+	for index < len(args) {
+		arg := args[index]
+
+		if strings.HasPrefix(arg, "--") {
+			flagName := strings.TrimPrefix(arg, "--")
+			flag := c.findFlag(flagName)
+
+			if flag == nil {
+				return fmt.Errorf("unknown flag %s", flagName)
+			}
+
+			if flag.Boolean {
+				ctx.bools[flag.Name] = true
+				flagsDone = append(flagsDone, flag.Name)
+				index++
+				continue
+			}
+
+			if index+1 >= len(args) {
+				return fmt.Errorf("expected value for flag %s", flagName)
+			}
+
+			if err := flag.Validate(ctx, args[index+1]); err != nil {
+				return err
+			}
+
+			ctx.flags[flag.Name] = args[index+1]
+			flagsDone = append(flagsDone, flag.Name)
+			index += 2
+		}
+
+		if strings.HasPrefix(arg, "-") {
+			flagNames := strings.TrimPrefix(arg, "-")
+			for _, flagName := range flagNames {
+				flag := c.findFlag(string(flagName))
+
+				if flag == nil {
+					return fmt.Errorf("unknown flag %s", string(flagName))
+				}
+
+				if !flag.Boolean && len(flagNames) > 1 {
+					return fmt.Errorf("flag %s is not a boolean flag but is being used in a multi-flag", string(flagName))
+				}
+
+				if flag.Boolean {
+					ctx.bools[string(flagName)] = true
+					flagsDone = append(flagsDone, string(flagName))
+					continue
+				}
+
+				if index+1 >= len(args) {
+					return fmt.Errorf("expected value for flag %s", string(flagName))
+				}
+
+				if err := flag.Validate(ctx, args[index+1]); err != nil {
+					return err
+				}
+
+				ctx.flags[string(flagName)] = args[index+1]
+				flagsDone = append(flagsDone, string(flagName))
+				index += 1
+			}
+
+			index++
+			continue
+		}
+
+		cleanArgs = append(cleanArgs, arg)
+		index++
+	}
+
+	for _, flag := range c.Flags {
+		if !utils.Contains(flagsDone, flag.Name) {
+			if flag.Boolean {
+				ctx.bools[flag.Name] = false
+			} else {
+				ctx.flags[flag.Name] = flag.Default
+			}
+		}
+	}
+
+	if c.VarArg != nil && len(cleanArgs) > len(c.Args) {
+		return fmt.Errorf("too many arguments, max %d given %d", len(c.Args), len(cleanArgs))
+	}
+
+	if len(cleanArgs) < c.required {
+		return fmt.Errorf("not enough arguments, required %d given %d", c.required, len(cleanArgs))
+	}
+
+	usedArgs := 0
+
+	for index, arg := range c.Args {
+		if index >= len(cleanArgs) {
+			break
+		}
+
+		if err := arg.Validate(ctx, cleanArgs[index]); err != nil {
+			return err
+		}
+
+		ctx.args[arg.Name] = cleanArgs[index]
+		usedArgs++
+	}
+
+	if c.VarArg != nil {
+		err := c.VarArg.Validate(ctx, cleanArgs[usedArgs:]...)
+		if err != nil {
+			return err
+		}
+		ctx.varArgs = cleanArgs[usedArgs:]
+	}
+
+	return nil
+}
+
+func (c *Command) findFlag(name string) *Flag {
+	for _, flag := range c.Flags {
+		if flag.Name == name || utils.Contains(flag.Aliases, name) {
+			return flag
+		}
+	}
+
+	return nil
 }
 
 type Arg struct {
@@ -128,6 +271,7 @@ type Flag struct {
 	Description string
 	Aliases     []string
 	Default     string
+	Boolean     bool
 	Validator   ArgValidator
 }
 

@@ -112,6 +112,10 @@ func (b *Bot) handleMessage(msg *events.MessageCreate) {
 		Bot:     b,
 		Message: &msg.Message,
 		Event:   msg,
+		args:    map[string]string{},
+		flags:   map[string]string{},
+		bools:   map[string]bool{},
+		varArgs: []string{},
 	}
 
 	args, err := glex.SplitCommand(msg.Message.Content)
