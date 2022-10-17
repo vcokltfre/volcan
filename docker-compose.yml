@@ -6,6 +6,7 @@ services:
     env_file: .env
     environment:
       API_BIND: 0.0.0.0:8080
+      DOCKER: "true"
     ports:
       - "8080:8080"
     volumes:
