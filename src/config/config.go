@@ -9,7 +9,8 @@ import (
 var Config ConfigSchema
 
 type ConfigSchema struct {
-	Prefixes Prefixes `yaml:"prefixes"`
+	Prefixes Prefixes       `yaml:"prefixes"`
+	Levels   map[string]int `yaml:"levels"`
 }
 
 type Prefixes struct {
