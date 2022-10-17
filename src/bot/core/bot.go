@@ -1,13 +1,19 @@
 package core
 
 import (
+	"context"
 	"fmt"
+	"os"
 
+	"github.com/disgoorg/disgo"
+	"github.com/disgoorg/disgo/bot"
+	"github.com/disgoorg/disgo/gateway"
 	"github.com/vcokltfre/volcan/src/utils"
 )
 
 type Bot struct {
 	Modules []*Module
+	Client  bot.Client
 
 	modules map[string]*Module
 }
@@ -37,4 +43,17 @@ func (b *Bot) Build() error {
 	}
 
 	return nil
+}
+
+func (b *Bot) Start() error {
+	client, err := disgo.New(os.Getenv("BOT_TOKEN"), bot.WithGatewayConfigOpts(
+		gateway.WithIntents(gateway.IntentsAll),
+	))
+	if err != nil {
+		return err
+	}
+
+	b.Client = client
+
+	return client.OpenGateway(context.Background())
 }

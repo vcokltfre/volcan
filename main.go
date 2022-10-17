@@ -38,6 +38,17 @@ func main() {
 	if err != nil {
 		logrus.Fatal(err)
 	}
+	logrus.Info("Finished building command trees.")
 
-	api.Start(os.Getenv("API_BIND"))
+	go api.Start(os.Getenv("API_BIND"))
+
+	err = bot.Start()
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	logrus.Info("API start dispatched.")
+
+	logrus.Info("Volcan started!")
+
+	select {}
 }
