@@ -63,7 +63,7 @@ func (b *Bot) Build() error {
 			}
 		}
 
-		logrus.Info("Registered module ", module.Name)
+		logrus.Info("Registered module ", module.Name, ".")
 	}
 
 	b.CommandCount = commandCount

@@ -28,10 +28,19 @@ func init() {
 func main() {
 	logrus.Info("Starting Volcan...")
 
+	moduleMap := map[string]*core.Module{
+		"meta": meta.MetaModule,
+	}
+	modules := []*core.Module{}
+
+	for name, module := range moduleMap {
+		if config.Config.IsEnabled(name) {
+			modules = append(modules, module)
+		}
+	}
+
 	bot := core.Bot{
-		Modules: []*core.Module{
-			meta.MetaModule,
-		},
+		Modules: modules,
 	}
 
 	err := bot.Build()
