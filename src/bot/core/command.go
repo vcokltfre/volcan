@@ -78,7 +78,33 @@ func (c *Command) Find(parts []string, index int) (*Command, int) {
 }
 
 func (c *Command) Run(ctx *Context, args []string) error {
-	return nil
+	if c.module.Check != nil {
+		_, err := c.module.Check(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	if c.Check != nil {
+		_, err := c.Check(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	parent := c.parent
+	for parent != nil {
+		if parent.Check != nil {
+			_, err := parent.Check(ctx)
+			if err != nil {
+				return err
+			}
+		}
+
+		parent = parent.parent
+	}
+
+	return c.Handler(ctx)
 }
 
 type Arg struct {
