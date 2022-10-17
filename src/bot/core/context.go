@@ -1,6 +1,8 @@
 package core
 
 import (
+	"fmt"
+
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/vcokltfre/volcan/src/config"
@@ -53,6 +55,15 @@ func (c *Context) Error(err error) {
 	c.Bot.Client.Rest().CreateMessage(
 		c.Event.ChannelID,
 		discord.NewMessageCreateBuilder().SetContent("An error occurred: "+err.Error()).SetAllowedMentions(&discord.AllowedMentions{
+			Parse: []discord.AllowedMentionType{},
+		}).Build(),
+	)
+}
+
+func (c *Context) Reply(message string, format ...interface{}) (*discord.Message, error) {
+	return c.Bot.Client.Rest().CreateMessage(
+		c.Event.ChannelID,
+		discord.NewMessageCreateBuilder().SetContent(fmt.Sprintf(message, format...)).SetAllowedMentions(&discord.AllowedMentions{
 			Parse: []discord.AllowedMentionType{},
 		}).Build(),
 	)
