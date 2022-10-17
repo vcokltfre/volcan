@@ -6,6 +6,8 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"github.com/vcokltfre/volcan/src/api"
+	"github.com/vcokltfre/volcan/src/bot/core"
+	"github.com/vcokltfre/volcan/src/bot/modules/meta"
 	"github.com/vcokltfre/volcan/src/config"
 )
 
@@ -24,7 +26,18 @@ func init() {
 }
 
 func main() {
-	logrus.Info("Starting Volcan...", config.Config)
+	logrus.Info("Starting Volcan...")
+
+	bot := core.Bot{
+		Modules: []*core.Module{
+			meta.MetaModule,
+		},
+	}
+
+	err := bot.Build()
+	if err != nil {
+		logrus.Fatal(err)
+	}
 
 	api.Start(os.Getenv("API_BIND"))
 }
