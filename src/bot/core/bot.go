@@ -11,15 +11,19 @@ import (
 	"github.com/vcokltfre/volcan/src/utils"
 )
 
+var BotInstance *Bot
+
 type Bot struct {
-	Modules []*Module
-	Client  bot.Client
+	Modules      []*Module
+	Client       bot.Client
+	CommandCount int
 
 	modules map[string]*Module
 }
 
 func (b *Bot) Build() error {
 	commandNames := []string{}
+	commandCount := 0
 
 	for _, module := range b.modules {
 		if _, ok := b.modules[module.Name]; ok {
@@ -40,7 +44,12 @@ func (b *Bot) Build() error {
 		}
 
 		b.modules[module.Name] = module
+		commandCount += len(module.Commands)
 	}
+
+	b.CommandCount = commandCount
+
+	BotInstance = b
 
 	return nil
 }

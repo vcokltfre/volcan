@@ -24,6 +24,7 @@ func (m *Module) Build() ([]string, error) {
 		}
 
 		commandNames = append(commandNames, command.Name)
+		commandNames = append(commandNames, command.Aliases...)
 	}
 
 	return commandNames, nil
