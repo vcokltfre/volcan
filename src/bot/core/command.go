@@ -1,6 +1,10 @@
 package core
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/vcokltfre/volcan/src/utils"
+)
 
 type CommandHandler func(*Context) error
 
@@ -56,6 +60,24 @@ func (c *Command) Build(module *Module, parent *Command) error {
 		}
 	}
 
+	return nil
+}
+
+func (c *Command) Find(parts []string, index int) (*Command, int) {
+	if len(parts) == 0 {
+		return c, index
+	}
+
+	for _, command := range c.Commands {
+		if command.Name == parts[0] || utils.Contains(command.Aliases, parts[0]) {
+			return command.Find(parts[1:], index+1)
+		}
+	}
+
+	return c, index
+}
+
+func (c *Command) Run(ctx *Context, args []string) error {
 	return nil
 }
 

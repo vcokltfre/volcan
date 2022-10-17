@@ -7,6 +7,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/sirupsen/logrus v1.9.0
+	github.com/vcokltfre/glex v0.0.0-20221013083520-5aa3f1d85d0f
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
