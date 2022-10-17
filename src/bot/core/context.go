@@ -69,3 +69,7 @@ func (c *Context) Flag(name string) string {
 func (c *Context) Bool(name string) bool {
 	return c.bools[name]
 }
+
+func (c *Context) Request(method string, path string, body any, out any, args ...any) error {
+	return c.Bot.Request(method, path, body, out, args...)
+}
